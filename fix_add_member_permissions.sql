@@ -1,7 +1,10 @@
--- Fix add member functionality by updating RLS policy
--- Drop the restrictive policy that only allows self-joining
+-- Fix add member functionality by updating RLS policies
+-- Run this script in your Supabase SQL Editor
+
+-- Drop existing restrictive policies
 DROP POLICY IF EXISTS "Users can add themselves to groups" ON public.group_memberships;
 DROP POLICY IF EXISTS "Users can add themselves or admins can add members" ON public.group_memberships;
+DROP POLICY IF EXISTS "Users can remove themselves from groups" ON public.group_memberships;
 
 -- Create new policy that allows both self-joining and admin-managed additions
 CREATE POLICY "Users can add themselves or admins can add members" ON public.group_memberships FOR INSERT 
@@ -13,9 +16,7 @@ WITH CHECK (
   )
 );
 
--- Also add a policy to allow admins to manage (update/delete) memberships
-DROP POLICY IF EXISTS "Users can remove themselves from groups" ON public.group_memberships;
-
+-- Allow users to remove themselves or admins to remove members
 CREATE POLICY "Users can remove themselves or admins can remove members" ON public.group_memberships FOR DELETE 
 USING (
   user_id = auth.uid() OR 

@@ -27,46 +27,27 @@ export const AddMemberDialog = ({ groupId, onMemberAdded }: AddMemberDialogProps
 
     setIsLoading(true);
     try {
-      // Find user by email first
-      const { data: targetUser, error: findError } = await supabase
-        .from('profiles')
-        .select('user_id, email, username')
-        .eq('email', email.trim())
-        .single();
-
-      if (findError || !targetUser) {
-        throw new Error('User not found with this email address');
-      }
-
-      // Check if user is already a member
-      const { data: existingMember } = await supabase
-        .from('group_memberships')
-        .select('id')
-        .eq('group_id', groupId)
-        .eq('user_id', targetUser.user_id)
-        .single();
-
-      if (existingMember) {
-        throw new Error('User is already a member of this group');
-      }
-
-      // Add user to group directly
-      const { error: addError } = await supabase
-        .from('group_memberships')
-        .insert({
+      // Use the manage-group Edge Function to add member
+      const { data, error } = await supabase.functions.invoke('manage-group', {
+        body: {
+          action: 'add-member',
           group_id: groupId,
-          user_id: targetUser.user_id,
-          role: 'member'
-        });
+          email: email.trim()
+        }
+      });
 
-      if (addError) {
-        console.error('Error adding member:', addError);
-        throw new Error('Failed to add member to group');
+      if (error) {
+        console.error('Error adding member:', error);
+        throw new Error(error.message || 'Failed to add member to group');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
         title: "Success",
-        description: `${targetUser.username || targetUser.email} added to group successfully`,
+        description: `Member added to group successfully`,
       });
 
       setEmail("");
@@ -92,30 +73,22 @@ export const AddMemberDialog = ({ groupId, onMemberAdded }: AddMemberDialogProps
         throw new Error('Friend not found');
       }
 
-      // Check if friend is already a member
-      const { data: existingMember } = await supabase
-        .from('group_memberships')
-        .select('id')
-        .eq('group_id', groupId)
-        .eq('user_id', friend.friend_id)
-        .single();
+      // Use the manage-group Edge Function to add friend by their email
+      const { data, error } = await supabase.functions.invoke('manage-group', {
+        body: {
+          action: 'add-member',
+          group_id: groupId,
+          email: friend.profile?.email
+        }
+      });
 
-      if (existingMember) {
-        throw new Error('Friend is already a member of this group');
+      if (error) {
+        console.error('Error adding friend:', error);
+        throw new Error(error.message || 'Failed to add friend to group');
       }
 
-      // Add friend to group
-      const { error: addError } = await supabase
-        .from('group_memberships')
-        .insert({
-          group_id: groupId,
-          user_id: friend.friend_id,
-          role: 'member'
-        });
-
-      if (addError) {
-        console.error('Error adding friend:', addError);
-        throw new Error('Failed to add friend to group');
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
