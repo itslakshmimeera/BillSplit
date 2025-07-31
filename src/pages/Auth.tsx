@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, User, UserPlus, ArrowLeft, Smartphone, CreditCard } from "lucide-react";
+
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -19,28 +20,22 @@ const Auth = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   useEffect(() => {
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         navigate("/dashboard");
       }
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const {
-        error
-      } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -73,13 +68,12 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const {
-        error
-      } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -100,12 +94,11 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const {
-        error
-      } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`
@@ -128,13 +121,12 @@ const Auth = () => {
       setIsGoogleLoading(false);
     }
   };
+
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const {
-        error
-      } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/auth?reset=true`
       });
       if (error) {
@@ -160,15 +152,17 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
   if (showForgotPassword) {
-    return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-accent/5 p-4">
-        <Card className="w-full max-w-md tech-border shadow-card backdrop-blur-sm">
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-pink-900/20 p-4">
+        <Card className="w-full max-w-md border-2 border-purple-200 dark:border-purple-800 shadow-xl backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
           <CardHeader className="text-center space-y-4">
-            <div className="w-16 h-16 mx-auto bg-gradient-primary rounded-full flex items-center justify-center">
-              <Mail className="h-8 w-8 text-primary-foreground" />
+            <div className="w-16 h-16 mx-auto bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+              <Mail className="h-8 w-8 text-white" />
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Reset Password
               </CardTitle>
               <CardDescription>
@@ -181,59 +175,75 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="resetEmail" className="text-sm font-medium">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input id="resetEmail" type="email" placeholder="Enter your email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} className="pl-10 h-12" required />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                  <Input 
+                    id="resetEmail" 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    value={resetEmail} 
+                    onChange={e => setResetEmail(e.target.value)} 
+                    className="pl-10 h-12" 
+                    required 
+                  />
                 </div>
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-all duration-300 shadow-lg" 
+                className="w-full h-12 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold transition-all duration-300 shadow-lg" 
                 disabled={isLoading}
               >
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
             </form>
             
-            <Button variant="ghost" onClick={() => setShowForgotPassword(false)} className="w-full flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowForgotPassword(false)} 
+              className="w-full flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Sign In
             </Button>
           </CardContent>
         </Card>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-accent/20 to-info/15 p-4 relative overflow-hidden">
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-pink-900/20 p-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-primary rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-accent rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-cyber rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-pink-400 to-orange-400 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-pulse delay-500"></div>
       </div>
       
-      <Card className="w-full max-w-md backdrop-blur-xl bg-white/90 dark:bg-black/90 border-2 border-white/20 shadow-2xl relative z-10">
+      <Card className="w-full max-w-md backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 border-2 border-purple-200 dark:border-purple-800 shadow-2xl relative z-10">
         <CardHeader className="text-center space-y-6 pb-8">
-          <div className="w-20 h-20 mx-auto bg-gradient-rainbow rounded-full flex items-center justify-center shadow-glow animate-pulse">
+          <div className="w-20 h-20 mx-auto bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
             <CreditCard className="h-10 w-10 text-white" />
           </div>
           <div className="space-y-3">
-            <CardTitle className="text-4xl font-bold bg-gradient-tech bg-clip-text text-transparent">
+            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
               BILLSPLIT
             </CardTitle>
-            <CardDescription className="text-lg text-muted-foreground">
+            <CardDescription className="text-lg text-gray-600 dark:text-gray-300">
               Split expenses effortlessly with friends & family
             </CardDescription>
           </div>
         </CardHeader>
+        
         <CardContent className="space-y-6">
-          {/* Google Sign In Button */}
+          {/* Google Sign In Button - Made more prominent */}
           <Button 
             onClick={handleGoogleSignIn} 
             variant="outline" 
-            className="w-full h-12 border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition-all duration-300 shadow-lg hover:shadow-md" 
+            className="w-full h-14 border-2 border-purple-300 dark:border-purple-700 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 shadow-lg hover:shadow-purple-200 dark:hover:shadow-purple-800 text-gray-700 dark:text-gray-200 font-semibold" 
             disabled={isGoogleLoading}
           >
-            <Smartphone className="h-5 w-5 mr-2 text-gray-600" />
-            <span className="font-semibold">
+            <Smartphone className="h-5 w-5 mr-3 text-purple-600 dark:text-purple-400" />
+            <span className="text-base">
               {isGoogleLoading ? "Connecting..." : "Continue with Google"}
             </span>
           </Button>
@@ -243,14 +253,14 @@ const Auth = () => {
               <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+              <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400">Or continue with email</span>
             </div>
           </div>
 
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-11">
-              <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 h-11 bg-gray-100 dark:bg-gray-800">
+              <TabsTrigger value="signin" className="text-sm font-medium">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-sm font-medium">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4 mt-6">
@@ -258,20 +268,41 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} className="pl-10 h-12" required />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      value={email} 
+                      onChange={e => setEmail(e.target.value)} 
+                      className="pl-10 h-12" 
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="password" type="password" placeholder="Enter your password" value={password} onChange={e => setPassword(e.target.value)} className="pl-10 h-12" required />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="Enter your password" 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)} 
+                      className="pl-10 h-12" 
+                      required 
+                    />
                   </div>
                 </div>
                 
                 <div className="flex justify-end">
-                  <Button type="button" variant="link" onClick={() => setShowForgotPassword(true)} className="text-sm text-primary p-0 h-auto">
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    onClick={() => setShowForgotPassword(true)} 
+                    className="text-sm text-purple-600 dark:text-purple-400 p-0 h-auto hover:text-purple-700 dark:hover:text-purple-300"
+                  >
                     Forgot password?
                   </Button>
                 </div>
@@ -279,7 +310,7 @@ const Auth = () => {
                 <Button 
                   type="submit" 
                   disabled={isLoading} 
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                  className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
                 >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
@@ -291,34 +322,66 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="fullName" type="text" placeholder="Enter your full name" value={fullName} onChange={e => setFullName(e.target.value)} className="pl-10 h-12" required />
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input 
+                      id="fullName" 
+                      type="text" 
+                      placeholder="Enter your full name" 
+                      value={fullName} 
+                      onChange={e => setFullName(e.target.value)} 
+                      className="pl-10 h-12" 
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-sm font-medium">Username</Label>
                   <div className="relative">
-                    <UserPlus className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="username" type="text" placeholder="Choose a username" value={username} onChange={e => setUsername(e.target.value)} className="pl-10 h-12" required />
+                    <UserPlus className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input 
+                      id="username" 
+                      type="text" 
+                      placeholder="Choose a username" 
+                      value={username} 
+                      onChange={e => setUsername(e.target.value)} 
+                      className="pl-10 h-12" 
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                  <Label htmlFor="signupEmail" className="text-sm font-medium">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} className="pl-10 h-12" required />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input 
+                      id="signupEmail" 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      value={email} 
+                      onChange={e => setEmail(e.target.value)} 
+                      className="pl-10 h-12" 
+                      required 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                  <Label htmlFor="signupPassword" className="text-sm font-medium">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="password" type="password" placeholder="Create a password" value={password} onChange={e => setPassword(e.target.value)} className="pl-10 h-12" required />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                    <Input 
+                      id="signupPassword" 
+                      type="password" 
+                      placeholder="Create a password" 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)} 
+                      className="pl-10 h-12" 
+                      required 
+                    />
                   </div>
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold transition-all duration-300 transform hover:scale-[1.02] shadow-lg" 
+                  className="w-full h-12 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 text-white font-semibold transition-all duration-300 transform hover:scale-[1.02] shadow-lg" 
                   disabled={isLoading}
                 >
                   {isLoading ? "Creating account..." : "Create Account"}
@@ -328,6 +391,8 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default Auth;
