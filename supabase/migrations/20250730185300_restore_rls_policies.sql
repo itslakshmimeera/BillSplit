@@ -34,8 +34,15 @@ USING (
   )
 );
 
-CREATE POLICY "Users can add themselves to groups" ON public.group_memberships FOR INSERT 
-WITH CHECK (user_id = auth.uid());
+-- Allow users to add themselves OR group admins to add others
+CREATE POLICY "Users can add themselves or admins can add members" ON public.group_memberships FOR INSERT 
+WITH CHECK (
+  user_id = auth.uid() OR 
+  group_id IN (
+    SELECT group_id FROM public.group_memberships 
+    WHERE user_id = auth.uid() AND role = 'admin'
+  )
+);
 
 CREATE POLICY "Users can update their own memberships" ON public.group_memberships FOR UPDATE 
 USING (user_id = auth.uid());
